@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Validate JSON</title>
+    <style>
+        html,
+        body {
+            position: relative;
+            width: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+        
+        textArea {
+            width: calc(100% - 35px);
+            height: 250px;
+            resize: vertical;
+        }
+        
+        button {
+            height: 35px;
+        }
+        
+        table {
+            width: 100%;
+            border: 1px dotted grey;
+        }
+        
+        td {
+            padding: 5px 10px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td>Main Config(JSON format)
+                <button onclick="validateData('inputConfigData')">Validate</button>
+                <button onclick="clearData('inputConfigData')">Clear</button></td>
+            <td>Config values from excel file(JSON format)
+                <button onclick="clearData('inputXlsData')">Clear</button>
+                <button onclick="validateData('inputXlsData')">Validate</button></td>
+        </tr>
+        <tr>
+            <td>
+                <textarea id="inputConfigData"></textarea>
+            </td>
+            <td> <textarea id="inputXlsData"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2"> <button id="btn" onclick="mergeData()">Merge Data</button> </td>
+        </tr>
+        <tr>
+            <td colspan="2"><textarea id="output"></textarea></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div id="logContainer">
+                    </textarea>
+            </td>
+        </tr>
+    </table>
+    <!--uncomment if files are included-->
+    <script src=config.js></script>
+    <script src=excelData.js></script>
+    <script>
+        function clearData(nodeId) {
+            document.getElementById(nodeId).value = "";
+        }
+        try {
+            //display data from js files
+            if (inputConfig) {
+                document.getElementById("inputConfigData").value = (inputConfig && JSON.stringify(inputConfig, null, '\t')) || "";
+            }
+            if (inputExcel) {
+                document.getElementById("inputXlsData").value = (inputExcel && JSON.stringify(inputExcel, null, '\t')) || "";
+            }
+        } catch (ex) {
+            document.getElementById("logContainer").innerHTML = "Error while fetching data from files...";
+        }
+
+        function validateData(nodeId) {
+            var inputNode = document.getElementById(nodeId);
+            try {
+                var parsedJson = JSON.parse(inputNode.value);
+                inputNode.value = JSON.stringify(parsedJson, null, '\t');
+                document.getElementById("logContainer").innerHTML = "Validated suceessfully!!!";
+            } catch (ex) {
+                document.getElementById("logContainer").innerHTML = "Invalid data";
+
+            }
+        }
+
+        function mergeData() {
+            try {
+                var inputConfigData, inputExcelData, parsedInputConfigData, parsedInputExcelData, item;
+                inputConfigData = document.getElementById("inputConfigData").value;
+                inputExcelData = document.getElementById("inputXlsData").value
+                if (inputConfigData && inputExcelData) {
+                    parsedInputConfigData = JSON.parse(inputConfigData);
+                    parsedInputExcelData = JSON.parse(inputExcelData);
+                    for (item in parsedInputConfigData) {
+                        if (parsedInputConfigData.hasOwnProperty(item) && parsedInputExcelData.hasOwnProperty(item)) {
+                            parsedInputConfigData[item] = parsedInputExcelData[item];
+                        }
+                    }
+                    outputConfig = JSON.stringify(parsedInputConfigData, null, '\t');
+                    document.getElementById("logContainer").innerHTML = "Data Merged successfully";
+
+                } else {
+                    document.getElementById("logContainer").innerHTML = "Input data required";
+                }
+                document.getElementById("output").value = outputConfig;
+
+            } catch (ex) {
+                document.getElementById("logContainer").innerHTML = "Ooops merging failed!!!";
+            }
+        }
+    </script>
+</body>
+
+</html>
